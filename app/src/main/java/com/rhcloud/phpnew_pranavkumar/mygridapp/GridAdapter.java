@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,28 +31,34 @@ import java.util.WeakHashMap;
 /**
  * Created by Edwin on 28/02/2015.
  */
-public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder> implements View.OnClickListener {
+public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
 
 
-
-    ArrayList<HashMap<String,String>> contacts;
-    HashMap<String, String> resultp = new HashMap<String, String>();
+    private List<FeedItem> feedItemList=new ArrayList<FeedItem>();;
+    //ArrayList<HashMap<String,String>> contacts;
+    //HashMap<String, String> resultp = new HashMap<String, String>();
     //Map<String, String> imageViews = Collection.synchronizedMap(new WeakHashMap<String, String>());
-    List<Contact> contacts2;
-    DatabaseHandler db;
-    String nature;
-    public GridAdapter(Context context,ArrayList<HashMap<String,String>> arrayList)
+    //List<Contact> contacts2;
+    //DatabaseHandler db;
+    //String nature;
+    String log;
+    private Context mContext;
+    FeedItem feedItem;
+    OnItemClickListener mItemClickListener;
+    public GridAdapter(Context context,List<FeedItem> feedItemList)
     {
-        super();
+       // super();
+        this.feedItemList = feedItemList;
+        this.mContext=context;
        // contacts = new ArrayList<HashMap<String, String>>();
         //this.context=context;
-       contacts=arrayList;
+      // contacts=arrayList;
 
-        contacts.add(resultp);
+       // contacts.add(resultp);
 
-        String n=resultp.get("flag");
+        //String n=resultp.get("flag");
 
-        db=new DatabaseHandler(context.getApplicationContext());
+        //db=new DatabaseHandler(context.getApplicationContext());
         //hi somechanges
         ;
       /*  try {
@@ -89,21 +96,26 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder> i
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.grid_item, viewGroup, false);
-        ViewHolder viewHolder = new ViewHolder(v);
-        return viewHolder;
+       // View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grid_item, viewGroup, false);
+       // ViewHolder viewHolder = new ViewHolder(v);
+        //return viewHolder;
+
+        final LayoutInflater mInflater = LayoutInflater.from(viewGroup.getContext());
+        final View sView = mInflater.inflate(R.layout.grid_item, viewGroup, false);
+        return new ViewHolder(sView);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(final ViewHolder viewHolder, int pos) {
 
-        resultp = contacts.get(i);
+        //feedItem = feedItemList.get(pos);
+       // resultp = contacts.get(i);
             try {
-               // String log=nature.get_name();
+              // log=feedItem.getThumbnail();
                 //Log.d("image",log);
-                nature=resultp.get("flag").toString();
-                viewHolder.imgThumbnail.setImageUrl(nature);
+              //  nature=resultp.get("flag").toString();
+               // viewHolder.imgThumbnail.setImageUrl(log);
+                viewHolder.imgThumbnail.setImageUrl(feedItemList.get(pos).getThumbnail());
 
             }
             catch (Exception e)
@@ -117,26 +129,38 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder> i
     @Override
     public int getItemCount() {
 
-        return contacts.size();
+        return feedItemList.size();
     }
 
-    @Override
-    public void onClick(View v) {
 
-          //  Toast.makeText(, "Visiting Card Clicked is ==>", Toast.LENGTH_SHORT).show();
 
-    }
-
-    class ViewHolder extends RecyclerView.ViewHolder{
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
 
         public SmartImageView imgThumbnail;
-        public ViewHolder(final View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
-
-            imgThumbnail= (SmartImageView)itemView.findViewById(R.id.img_thumbnail);
             final RecyclerView mRecyclerView = (RecyclerView)itemView.findViewById(R.id.recycler_view);
-            itemView.setOnClickListener(new View.OnClickListener() {
+            imgThumbnail= (SmartImageView)itemView.findViewById(R.id.img_thumbnail);
+            itemView.setOnClickListener(this);
+           /* imgThumbnail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+
+
+                    Intent intent = new Intent(v.getContext(), FullScreenActivity.class);
+
+                    //String p=feedItem.getThumbnail();
+                    // Pass all data flag
+                   // intent.putExtra("flag", p);
+                    // Start SingleItemView Class
+                    v.getContext().startActivity(intent);
+
+                }
+            });
+           // final RecyclerView mRecyclerView = (RecyclerView)itemView.findViewById(R.id.recycler_view);
+           /* itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
@@ -153,8 +177,24 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder> i
                     // Start SingleItemView Class
                     v.getContext().startActivity(intent);
                 }
-            });
+            });*/
 
         }
+
+        @Override
+        public void onClick(View v) {
+
+
+               mItemClickListener.onItemClick(v,getPosition());
+
+        }
+    }
+
+    public interface OnItemClickListener {
+        public void onItemClick(View view , int position);
+    }
+
+    public void SetOnItemClickListener(final OnItemClickListener mItemClickListener) {
+        this.mItemClickListener = mItemClickListener;
     }
 }

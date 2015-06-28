@@ -2,6 +2,7 @@ package com.rhcloud.phpnew_pranavkumar.mygridapp;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -25,12 +27,13 @@ public class MainActivity extends ActionBarActivity {
 
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager mLayoutManager;
-    RecyclerView.Adapter mAdapter;
+    GridAdapter mAdapter;
     ProgressDialog mProgressDialog;
     JSONObject jsonobject;
     JSONArray jsonarray;
     DatabaseHandler db;
     // MyAdapter myAdapter;
+    private List<FeedItem> feedItemList = new ArrayList<FeedItem>();
     String st;
     ArrayList<HashMap<String, String>> arraylist;
 
@@ -61,6 +64,8 @@ public class MainActivity extends ActionBarActivity {
         // The number of Columns
         mLayoutManager = new GridLayoutManager(getApplicationContext(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+
 
 
 
@@ -100,14 +105,18 @@ public class MainActivity extends ActionBarActivity {
                 jsonarray = reader.getJSONArray("images");
 
                 for (int i = 0; i < jsonarray.length(); i++) {
-                    HashMap<String, String> map = new HashMap<String, String>();
+                   // HashMap<String, String> map = new HashMap<String, String>();
                     jsonobject = jsonarray.getJSONObject(i);
                     // Retrive JSON Objects
 
-                    map.put("flag", jsonobject.getString("image"));
+                    FeedItem item = new FeedItem();
+
+                    item.setThumbnail(jsonobject.optString("image"));
+                    feedItemList.add(item);
+                    //map.put("flag", jsonobject.getString("image"));
 
                     // Set the JSON Objects into the array
-                    arraylist.add(map);
+                    //arraylist.add(map);
                     //jsonobject = jsonarray.getJSONObject(i);
                     // Retrive JSON Objects
 
@@ -150,10 +159,28 @@ public class MainActivity extends ActionBarActivity {
 
 
 
-            mAdapter = new GridAdapter(MainActivity.this,arraylist);
+            mAdapter = new GridAdapter(MainActivity.this,feedItemList);
             mRecyclerView.setAdapter(mAdapter);
 
             mProgressDialog.dismiss();
+
+            mAdapter.SetOnItemClickListener(new GridAdapter.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(View v , int position) {
+                    // do something with position
+                    String b=feedItemList.get(position).getThumbnail();
+
+                    Toast.makeText(getApplicationContext(),b,Toast.LENGTH_LONG).show();
+
+                    Intent intent = new Intent(getApplicationContext(), FullScreenActivity.class);
+
+                    // Pass all data flag
+                    intent.putExtra("flag", b);
+                    // Start SingleItemView Class
+                    startActivity(intent);
+                }
+            });
 
         }
     }
