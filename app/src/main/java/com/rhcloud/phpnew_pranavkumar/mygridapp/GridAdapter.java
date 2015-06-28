@@ -52,6 +52,7 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder> i
         String n=resultp.get("flag");
 
         db=new DatabaseHandler(context.getApplicationContext());
+        //hi somechanges
         ;
       /*  try {
             contacts = new ArrayList<Contact>();
