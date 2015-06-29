@@ -34,64 +34,17 @@ import java.util.WeakHashMap;
 public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
 
 
-    private List<FeedItem> feedItemList=new ArrayList<FeedItem>();;
-    //ArrayList<HashMap<String,String>> contacts;
-    //HashMap<String, String> resultp = new HashMap<String, String>();
-    //Map<String, String> imageViews = Collection.synchronizedMap(new WeakHashMap<String, String>());
-    //List<Contact> contacts2;
-    //DatabaseHandler db;
-    //String nature;
-    String log;
+    private List<FeedItem> feedItemList=new ArrayList<FeedItem>();
     private Context mContext;
     FeedItem feedItem;
     OnItemClickListener mItemClickListener;
+
+
     public GridAdapter(Context context,List<FeedItem> feedItemList)
     {
-       // super();
+
         this.feedItemList = feedItemList;
         this.mContext=context;
-       // contacts = new ArrayList<HashMap<String, String>>();
-        //this.context=context;
-      // contacts=arrayList;
-
-       // contacts.add(resultp);
-
-        //String n=resultp.get("flag");
-
-        //db=new DatabaseHandler(context.getApplicationContext());
-        //hi somechanges
-        ;
-      /*  try {
-            contacts = new ArrayList<Contact>();
-           // contacts2 = new ArrayList<Contact>();
-
-            //db=new DatabaseHandler();
-            Log.d("hi","bye");
-            //db=new DatabaseHandler(Context);
-            contacts = db.getAllContacts();
-            Log.d("Name: ", "enterd");
-               // Contact c= new Contact();
-            Contact c = new Contact();
-            //c.get_name();
-            for (int i = 0; i < contacts.size(); i++) {
-
-
-                for (Contact cn : contacts) {
-                    String log = cn.get_name();
-
-                    c.set_name(log);
-
-                }
-                contacts.add(c);
-            }
-
-
-        }
-        catch (Exception e)
-        {
-
-        }*/
-
     }
 
     @Override
@@ -108,20 +61,15 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, int pos) {
 
-        //feedItem = feedItemList.get(pos);
-       // resultp = contacts.get(i);
-            try {
-              // log=feedItem.getThumbnail();
-                //Log.d("image",log);
-              //  nature=resultp.get("flag").toString();
-               // viewHolder.imgThumbnail.setImageUrl(log);
+        try
+        {
                 viewHolder.imgThumbnail.setImageUrl(feedItemList.get(pos).getThumbnail());
 
-            }
-            catch (Exception e)
-            {
+        }
+        catch (Exception e)
+        {
 
-            }
+        }
 
 
     }
@@ -140,50 +88,14 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
         public SmartImageView imgThumbnail;
         public ViewHolder(View itemView) {
             super(itemView);
-            final RecyclerView mRecyclerView = (RecyclerView)itemView.findViewById(R.id.recycler_view);
+
             imgThumbnail= (SmartImageView)itemView.findViewById(R.id.img_thumbnail);
             itemView.setOnClickListener(this);
-           /* imgThumbnail.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-
-
-                    Intent intent = new Intent(v.getContext(), FullScreenActivity.class);
-
-                    //String p=feedItem.getThumbnail();
-                    // Pass all data flag
-                   // intent.putExtra("flag", p);
-                    // Start SingleItemView Class
-                    v.getContext().startActivity(intent);
-
-                }
-            });
-           // final RecyclerView mRecyclerView = (RecyclerView)itemView.findViewById(R.id.recycler_view);
-           /* itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    String next=resultp.get("flag").toString();
-
-                    int itemPosition = mRecyclerView.getChildPosition(itemView);
-                    String item = resultp.get(itemPosition);
-                    Toast.makeText(v.getContext(), item, Toast.LENGTH_LONG).show();
-
-                    Intent intent = new Intent(v.getContext(), FullScreenActivity.class);
-
-                    // Pass all data flag
-                    intent.putExtra("flag", next);
-                    // Start SingleItemView Class
-                    v.getContext().startActivity(intent);
-                }
-            });*/
 
         }
 
         @Override
         public void onClick(View v) {
-
 
                mItemClickListener.onItemClick(v,getPosition());
 

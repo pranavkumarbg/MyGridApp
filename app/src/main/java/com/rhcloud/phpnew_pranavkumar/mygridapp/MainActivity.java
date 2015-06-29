@@ -33,30 +33,16 @@ public class MainActivity extends ActionBarActivity {
     JSONArray jsonarray;
     DatabaseHandler db;
     // MyAdapter myAdapter;
-    private List<FeedItem> feedItemList = new ArrayList<FeedItem>();
+    private ArrayList<FeedItem> feedItemList = new ArrayList<FeedItem>();
     String st;
-    ArrayList<HashMap<String, String>> arraylist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        db = new DatabaseHandler(this);
-        // Calling the RecyclerView
-       /* mRecyclerView = (RecyclerView)findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-
-        // The number of Columns
-        mLayoutManager = new GridLayoutManager(this, 2);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-
-        mAdapter = new GridAdapter();
-        mRecyclerView.setAdapter(mAdapter);*/
-
-
+        //db = new DatabaseHandler(this);
         new DownloadJSON().execute();
-
 
         mRecyclerView = (RecyclerView)findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
@@ -64,10 +50,6 @@ public class MainActivity extends ActionBarActivity {
         // The number of Columns
         mLayoutManager = new GridLayoutManager(getApplicationContext(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
-
-
-
-
 
     }
 
@@ -93,7 +75,7 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected Void doInBackground(Void... params) {
             // Create an array
-            arraylist = new ArrayList<HashMap<String, String>>();
+
             // Retrieve JSON Objects from the given URL address
             //String json = JSONfunctions.getJSONfromURL("http://env-6425390.jelasticlw.com.br/grid/");
 
@@ -113,18 +95,6 @@ public class MainActivity extends ActionBarActivity {
 
                     item.setThumbnail(jsonobject.optString("image"));
                     feedItemList.add(item);
-                    //map.put("flag", jsonobject.getString("image"));
-
-                    // Set the JSON Objects into the array
-                    //arraylist.add(map);
-                    //jsonobject = jsonarray.getJSONObject(i);
-                    // Retrive JSON Objects
-
-                    //st=jsonobject.getString("image");
-                    //list1.add(st);
-
-
-
 
                 }
             } catch (JSONException e) {
@@ -135,30 +105,8 @@ public class MainActivity extends ActionBarActivity {
         }
 
         @Override
-        protected void onPostExecute(Void args) {
-
-
-            //Toast.makeText(getApplicationContext(),st,Toast.LENGTH_LONG).show();
-
-         /*   for(int i=0; i<list1.size(); i++)
-            {
-
-                String my=list1.get(i).toString();
-                //Toast.makeText(getApplicationContext(),my,Toast.LENGTH_LONG).show();
-                Contact c=new Contact();
-                c.set_name(my);
-                db.addContact(c);
-                Log.d("Insert: ", "Inserting ..");
-
-
-            }*/
-
-
-
-
-
-
-
+        protected void onPostExecute(Void args)
+        {
             mAdapter = new GridAdapter(MainActivity.this,feedItemList);
             mRecyclerView.setAdapter(mAdapter);
 
@@ -169,19 +117,33 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onItemClick(View v , int position) {
                     // do something with position
-                    String b=feedItemList.get(position).getThumbnail();
-
-                    Toast.makeText(getApplicationContext(),b,Toast.LENGTH_LONG).show();
-
-                    Intent intent = new Intent(getApplicationContext(), FullScreenActivity.class);
-
-                    // Pass all data flag
-                    intent.putExtra("flag", b);
-                    // Start SingleItemView Class
-                    startActivity(intent);
+                    nextactivity(position);
                 }
             });
 
         }
+    }
+
+    private void nextactivity(int position)
+    {
+        String b=feedItemList.get(position).getThumbnail();
+
+        Intent intent = new Intent(getApplicationContext(), FullScreenActivity.class);
+
+        String p=Integer.toString(position);
+        // Pass all data flag
+        intent.putExtra("flag", b);
+        //intent.putExtra("pos",position);
+        intent.putExtra("pos", p);
+       // FeedItem f=new FeedItem();
+       // ArrayList<String> al=new ArrayList<String>();
+        FullScreenActivity f=new FullScreenActivity();
+        f.mylist(feedItemList);
+
+        //al.add(f.getThumbnail());
+        //intent.putStringArrayListExtra("arr",al);
+
+        // Start SingleItemView Class
+        startActivity(intent);
     }
 }
