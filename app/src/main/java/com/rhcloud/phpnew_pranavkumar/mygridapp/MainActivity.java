@@ -137,8 +137,8 @@ public class MainActivity extends ActionBarActivity {
         intent.putExtra("pos", p);
        // FeedItem f=new FeedItem();
        // ArrayList<String> al=new ArrayList<String>();
-        FullScreenActivity f=new FullScreenActivity();
-        f.mylist(feedItemList);
+//        FullScreenActivity f=new FullScreenActivity();
+//        f.mylist(feedItemList);
 
         //al.add(f.getThumbnail());
         //intent.putStringArrayListExtra("arr",al);
