@@ -58,7 +58,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
      */
 
     // Adding new contact
-    void addContact(Contact contact) {
+   /* void addContact(Contact contact) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -86,7 +86,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }*/
 
     // Getting All Contacts
-    public List<Contact> getAllContacts() {
+ /*   public List<Contact> getAllContacts() {
         List<Contact> contactList = new ArrayList<Contact>();
         // Select All Query
         String selectQuery = "SELECT  * FROM tableimages";
@@ -133,7 +133,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 
     // Getting contacts Count
-    public int getContactsCount() {
+  /*  public int getContactsCount() {
         String countQuery = "SELECT  * FROM " + TABLE_IMAGES;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
@@ -141,6 +141,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // return count
         return cursor.getCount();
-    }
+    }*/
 
 }
