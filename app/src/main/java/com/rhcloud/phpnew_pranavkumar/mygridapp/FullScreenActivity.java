@@ -1,6 +1,7 @@
 package com.rhcloud.phpnew_pranavkumar.mygridapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Matrix;
@@ -11,21 +12,31 @@ import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.loopj.android.image.SmartImage;
 import com.loopj.android.image.SmartImageView;
+import com.startapp.android.publish.StartAppAd;
+import com.startapp.android.publish.banner.Banner;
+
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by my on 6/28/2015.
  */
 public class FullScreenActivity extends ActionBarActivity implements View.OnTouchListener{
 
-    SmartImageView myImage;
-
+    private NetworkImageView myImage;
+    private ImageLoader imageLoader;
 
     private static final String TAG = "Touch";
     @SuppressWarnings("unused")
@@ -50,25 +61,62 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
     private Cursor cursor;
     String flag;
 
+    /** StartAppAd object declaration */
+    private StartAppAd startAppAd = new StartAppAd(this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fullscreanactivity);
 
+        /** Add banner programmatically (within Java code, instead of within the layout xml) **/
+        RelativeLayout mainLayout = (RelativeLayout) findViewById(R.id.rela);
+
+        // Create new StartApp banner
+        Banner startAppBanner = new Banner(this);
+        RelativeLayout.LayoutParams bannerParameters =
+                new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT);
+        bannerParameters.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        bannerParameters.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+
+        // Add the banner to the main layout
+        mainLayout.addView(startAppBanner, bannerParameters);
+
+
         Intent i = getIntent();
 
         flag = i.getStringExtra("flag");
-        String p=i.getStringExtra("pos");
-        Toast.makeText(getApplicationContext(),p,Toast.LENGTH_LONG).show();
+       // String p=i.getStringExtra("pos");
+       // Toast.makeText(getApplicationContext(),flag,Toast.LENGTH_LONG).show();
 
-        position=Integer.parseInt(p);
+       // position=Integer.parseInt(p);
+
+        //feedItemList=(ArrayList<FeedItem>)getIntent().getSerializableExtra("FILES_TO_SEND");
+
+//        for (int j = 0; j < feedItemList.size(); j++)
+//        {
+//           // System.out.println(feedItemList.get(j));
+//            Log.d("arraylist",feedItemList.get(j).getThumbnail());
+//        }
         // cursor=managedQuery(null,null,flag,null,null);
         // columnIndex=cursor.getColumnIndexOrThrow(flag);
-        myImage = (SmartImageView)findViewById(R.id.img_thumbnailfull);
-        myImage.setImageUrl(flag);
+        myImage = (NetworkImageView)findViewById(R.id.img_thumbnailfull);
+
+        imageLoader=CustomVolleyRequestQueue.getInstance(getApplicationContext()).getImageLoader();
+
+
+        imageLoader.get(flag, ImageLoader.getImageListener(myImage, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
+        //imageLoader.get(url,ImageLoader.getImageListener());
+        myImage.setImageUrl(flag, imageLoader);
+       // myImage.setImageUrl(flag);
         myImage.setOnTouchListener(this);
         //Switch=(ImageSwitcher)findViewById(R.id.viewFlipper);
     }
+
+
+
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -182,4 +230,51 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
         Log.d("Touch Event", sb.toString());
     }
 
+    /**
+     * Part of the activity's life cycle, StartAppAd should be integrated here.
+     */
+    @Override
+    public void onResume(){
+        super.onResume();
+        startAppAd.onResume();
+    }
+
+    /**
+     * Part of the activity's life cycle, StartAppAd should be integrated here
+     * for the home button exit ad integration.
+     */
+    @Override
+    public void onPause(){
+        super.onPause();
+        startAppAd.onPause();
+    }
+
+    /**
+     * Part of the activity's life cycle, StartAppAd should be integrated here
+     * for the back button exit ad integration.
+     */
+    @Override
+    public void onBackPressed() {
+        startAppAd.onBackPressed();
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindDrawables(findViewById(R.id.rela));
+        System.gc();
+    }
+
+    private void unbindDrawables(View view) {
+        if (view.getBackground() != null) {
+            view.getBackground().setCallback(null);
+        }
+        if (view instanceof ViewGroup) {
+            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+                unbindDrawables(((ViewGroup) view).getChildAt(i));
+            }
+            ((ViewGroup) view).removeAllViews();
+        }
+    }
 }

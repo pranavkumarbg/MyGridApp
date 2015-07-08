@@ -35,35 +35,37 @@ import java.util.WeakHashMap;
 /**
  * Created by Edwin on 28/02/2015.
  */
-public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
+public class MyNewAdapter  extends RecyclerView.Adapter<MyNewAdapter.ViewHolder>{
 
 
-    private LruCache<Integer,Bitmap> imageCache;
-    private List<FeedItem> feedItemList=new ArrayList<FeedItem>();
+
     private Context mContext;
-    FeedItem feedItem;
+    ArrayList<String> feedItem= new ArrayList<>();
     OnItemClickListener mItemClickListener;
     private ImageLoader imageLoader;
-   // NetworkImageView imgThumbnail;
+    NetworkImageView imgThumbnail;
 
-    public GridAdapter(Context context,List<FeedItem> feedItemList)
+    public MyNewAdapter(Context context,ArrayList<String> feedItemList)
     {
 
-        this.feedItemList = feedItemList;
+        this.feedItem = feedItemList;
         this.mContext=context;
 
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-       // View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grid_item, viewGroup, false);
-       // ViewHolder viewHolder = new ViewHolder(v);
+        // View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grid_item, viewGroup, false);
+        // ViewHolder viewHolder = new ViewHolder(v);
         //return viewHolder;
 
         final LayoutInflater mInflater = LayoutInflater.from(viewGroup.getContext());
         final View sView = mInflater.inflate(R.layout.grid_item, viewGroup, false);
         return new ViewHolder(sView);
     }
+
+
+
 
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, int pos) {
@@ -73,18 +75,11 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
             //int a=Integer.parseInt(feedItemList.get(pos).getThumbnail());
             //Bitmap bitmap=imageCache.get(a);
             //if(bitmap!=null) {
-           // viewHolder.spinner.setVisibility(pos);
-           // viewHolder.imgThumbnail.setImageUrl(feedItemList.get(pos).getThumbnail());
+            // viewHolder.spinner.setVisibility(pos);
+            viewHolder.imgThumbnail.setImageUrl(feedItem.get(pos));
             //viewHolder.spinner.setVisibility(View.GONE);
 
             //}
-
-            imageLoader=CustomVolleyRequestQueue.getInstance(mContext).getImageLoader();
-
-            final String url = feedItemList.get(pos).getThumbnail();
-            imageLoader.get(url, ImageLoader.getImageListener(viewHolder.imgThumbnail, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
-            //imageLoader.get(url,ImageLoader.getImageListener());
-            viewHolder.imgThumbnail.setImageUrl(url, imageLoader);
 
         }
         catch (Exception e)
@@ -98,7 +93,7 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
     @Override
     public int getItemCount() {
 
-        return feedItemList.size();
+        return feedItem.size();
     }
 
 
@@ -106,15 +101,14 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
 
-        private NetworkImageView imgThumbnail;
+        public SmartImageView imgThumbnail;
         private ProgressBar spinner;
 
         public ViewHolder(View itemView)
         {
             super(itemView);
-            spinner = (ProgressBar)itemView.findViewById(R.id.progressBar);
 
-            imgThumbnail= (NetworkImageView )itemView.findViewById(R.id.img_thumbnail);
+            imgThumbnail= (SmartImageView)itemView.findViewById(R.id.img_thumbnail);
             itemView.setOnClickListener(this);
 
         }
@@ -122,7 +116,7 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
         @Override
         public void onClick(View v) {
 
-               mItemClickListener.onItemClick(v,getPosition());
+            mItemClickListener.onItemClick(v,getPosition());
 
         }
     }

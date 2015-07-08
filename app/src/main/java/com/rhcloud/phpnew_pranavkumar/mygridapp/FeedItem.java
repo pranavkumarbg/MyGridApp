@@ -5,7 +5,7 @@ package com.rhcloud.phpnew_pranavkumar.mygridapp;
  */
 public class FeedItem {
 
-   private String thumbnail;
+    private String thumbnail;
 
     public String getThumbnail() {
         return thumbnail;
