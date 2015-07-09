@@ -58,6 +58,7 @@ public class MainActivity extends ActionBarActivity {
     JSONArray jsonarray;
     DatabaseHandler db;
     String b;
+    int p;
     // MyAdapter myAdapter;
     private ArrayList<FeedItem> feedItemList = new ArrayList<FeedItem>();
     //List<String> list= Arrays.asList();
@@ -295,8 +296,8 @@ public class MainActivity extends ActionBarActivity {
     private void nextactivity(int position) {
 
         b = feedItemList.get(position).getThumbnail();
-
-        //String p1 = Integer.toString(position);
+       // p = feedItemList.get(position);
+        String p1 = Integer.toString(position);
 
 
 
@@ -326,8 +327,8 @@ public class MainActivity extends ActionBarActivity {
 
                 // Pass all data flag
                 intent.putExtra("flag", b);
-                //intent.putExtra("pos",position);
-                // intent.putExtra("pos", p);
+
+                //intent.putExtra("pos",p1);
                 //intent.putExtra("FILES_TO_SEND", feedItemList);
                 // FeedItem f=new FeedItem();
                 // ArrayList<String> al=new ArrayList<String>();

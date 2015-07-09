@@ -1,15 +1,23 @@
 package com.rhcloud.phpnew_pranavkumar.mygridapp;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,16 +35,35 @@ import com.startapp.android.publish.StartAppAd;
 import com.startapp.android.publish.banner.Banner;
 
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by my on 6/28/2015.
  */
-public class FullScreenActivity extends ActionBarActivity implements View.OnTouchListener{
+public class FullScreenActivity extends ActionBarActivity implements View.OnTouchListener {
 
-    private NetworkImageView myImage;
+    ProgressDialog mProgressDialog;
+    private ImageView myImage;
     private ImageLoader imageLoader;
+    ImageLoader.ImageCache imageCache;
+    private static final int IO_BUFFER_SIZE = 4 * 1024;
 
     private static final String TAG = "Touch";
     @SuppressWarnings("unused")
@@ -57,12 +84,15 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
     float oldDist = 1f;
     ImageSwitcher Switch;
     float initialX;
-    int position,columnIndex;
+    int position, columnIndex;
     private Cursor cursor;
     String flag;
 
-    /** StartAppAd object declaration */
+    /**
+     * StartAppAd object declaration
+     */
     private StartAppAd startAppAd = new StartAppAd(this);
+    public Bitmap bitmaptwo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,34 +118,69 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
         Intent i = getIntent();
 
         flag = i.getStringExtra("flag");
-       // String p=i.getStringExtra("pos");
-       // Toast.makeText(getApplicationContext(),flag,Toast.LENGTH_LONG).show();
 
-       // position=Integer.parseInt(p);
+        myImage = (ImageView) findViewById(R.id.img_thumbnailfull);
 
-        //feedItemList=(ArrayList<FeedItem>)getIntent().getSerializableExtra("FILES_TO_SEND");
+       // imageLoader = CustomVolleyRequestQueue.getInstance(getApplicationContext()).getImageLoader();
+        new BackgroundTask().execute(flag);
 
-//        for (int j = 0; j < feedItemList.size(); j++)
-//        {
-//           // System.out.println(feedItemList.get(j));
-//            Log.d("arraylist",feedItemList.get(j).getThumbnail());
-//        }
-        // cursor=managedQuery(null,null,flag,null,null);
-        // columnIndex=cursor.getColumnIndexOrThrow(flag);
-        myImage = (NetworkImageView)findViewById(R.id.img_thumbnailfull);
-
-        imageLoader=CustomVolleyRequestQueue.getInstance(getApplicationContext()).getImageLoader();
-
-
-        imageLoader.get(flag, ImageLoader.getImageListener(myImage, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
+        //imageLoader.get(flag, ImageLoader.getImageListener(myImage, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
         //imageLoader.get(url,ImageLoader.getImageListener());
-        myImage.setImageUrl(flag, imageLoader);
-       // myImage.setImageUrl(flag);
-        myImage.setOnTouchListener(this);
+       // myImage.setImageUrl(flag, imageLoader);
+        // myImage.setImageUrl(flag);
+        //myImage.setOnTouchListener(this);
+
+
         //Switch=(ImageSwitcher)findViewById(R.id.viewFlipper);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
+        menu.add("").setOnMenuItemClickListener(this.SetWallpaperClickListener).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    // Capture actionbar menu item click
+    MenuItem.OnMenuItemClickListener SetWallpaperClickListener = new MenuItem.OnMenuItemClickListener() {
+
+        public boolean onMenuItemClick(MenuItem item) {
+
+
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            // get the height and width of screen
+            int height = metrics.heightPixels;
+            int width = metrics.widthPixels;
+            // Retrieve a WallpaperManager
+            WallpaperManager myWallpaperManager = WallpaperManager
+                    .getInstance(FullScreenActivity.this);
+
+            try {
+
+               // Toast.makeText(FullScreenActivity.this, "Wallpaper changing", Toast.LENGTH_SHORT).show();
+
+
+                //Bitmap bitmap=imageCache.getBitmap(flag);
+                // Bitmap bitmap = BitmapFactory.decodeFile(flag);
+
+                // Change the current system wallpaper
+                // myWallpaperManager.setResource(R.drawable.wallpaper);
+                myWallpaperManager.setBitmap(bitmaptwo);
+
+                myWallpaperManager.suggestDesiredDimensions(height, width);
+
+                // Show a toast message on successful change
+                Toast.makeText(FullScreenActivity.this, "Wallpaper successfully changed", Toast.LENGTH_SHORT).show();
+
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+            }
+
+            return false;
+        }
+    };
 
 
     @Override
@@ -130,7 +195,7 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: // first finger down only
-                initialX=event.getX();
+                initialX = event.getX();
                 savedMatrix.set(matrix);
                 start.set(event.getX(), event.getY());
                 Log.d(TAG, "mode=DRAG"); // write to LogCat
@@ -138,7 +203,6 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
                 break;
 
             case MotionEvent.ACTION_UP:
-
 
 
             case MotionEvent.ACTION_POINTER_UP:
@@ -188,6 +252,7 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
 
         return true;
     }
+
     private float spacing(MotionEvent event) {
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
@@ -202,8 +267,8 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
     }
 
     private void dumpEvent(MotionEvent event) {
-        String names[] = { "DOWN", "UP", "MOVE", "CANCEL", "OUTSIDE",
-                "POINTER_DOWN", "POINTER_UP", "7?", "8?", "9?" };
+        String names[] = {"DOWN", "UP", "MOVE", "CANCEL", "OUTSIDE",
+                "POINTER_DOWN", "POINTER_UP", "7?", "8?", "9?"};
         StringBuilder sb = new StringBuilder();
         int action = event.getAction();
         int actionCode = action & MotionEvent.ACTION_MASK;
@@ -234,7 +299,7 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
      * Part of the activity's life cycle, StartAppAd should be integrated here.
      */
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         startAppAd.onResume();
     }
@@ -244,7 +309,7 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
      * for the home button exit ad integration.
      */
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         startAppAd.onPause();
     }
@@ -277,4 +342,77 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
             ((ViewGroup) view).removeAllViews();
         }
     }
+
+    //----------------------------------------------------------------------------------------------------//
+
+
+    private class BackgroundTask extends AsyncTask<String, Void, Bitmap> {
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            mProgressDialog = new ProgressDialog(FullScreenActivity.this);
+            // Set progressdialog title
+            mProgressDialog.setTitle("MyGridApp");
+            // Set progressdialog message
+            mProgressDialog.setMessage("Loading...");
+            mProgressDialog.setIndeterminate(false);
+            // Show progressdialog
+            mProgressDialog.show();
+        }
+
+        protected Bitmap doInBackground(String... url) {
+            //--- download an image ---
+
+            bitmaptwo = DownloadImage(url[0]);
+            return bitmaptwo;
+        }
+
+        protected void onPostExecute(Bitmap bitmap) {
+            // ImageView image = (ImageView) findViewById(R.id.imageView1);
+            //bitmaptwo=bitmap;
+            //image.setImageBitmap(bitmap);
+            // bitmaptwo = bitmap;
+            //  Toast.makeText(FullScreenActivity.this, "post excute", Toast.LENGTH_LONG).show();
+            myImage.setImageBitmap(bitmaptwo);
+            mProgressDialog.dismiss();
+        }
+    }
+
+    private InputStream OpenHttpConnection(String... url) throws IOException {
+        InputStream in = null;
+        try {
+            HttpClient httpclient = new DefaultHttpClient();
+            //HttpPost httppost = new HttpPost(url);
+            HttpResponse response = httpclient.execute(new HttpGet(url[0]));
+            HttpEntity entity = response.getEntity();
+            in = entity.getContent();
+
+        } catch (Exception e) {
+            Log.e("log_tag", "Error in http connection " + e.toString());
+        }
+
+        return in;
+    }
+
+    private Bitmap DownloadImage(String URL) {
+        Bitmap bitmap = null;
+        InputStream in = null;
+        try {
+            in = OpenHttpConnection(URL);
+            bitmap = BitmapFactory.decodeStream(in);
+            in.close();
+        } catch (IOException e1) {
+            Toast.makeText(this, e1.getLocalizedMessage(),
+                    Toast.LENGTH_LONG).show();
+
+            e1.printStackTrace();
+        }
+        return bitmap;
+    }
+
+
+    //----------------------------------------------------------------------------------------------------//
 }
