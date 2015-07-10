@@ -414,8 +414,8 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindDrawables(findViewById(R.id.relmain));
-        System.gc();
+        //unbindDrawables(findViewById(R.id.relmain));
+        //System.gc();
     }
 
     private void unbindDrawables(View view) {

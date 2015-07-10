@@ -17,6 +17,7 @@ import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +30,7 @@ import android.widget.ViewFlipper;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.RequestFuture;
 import com.loopj.android.image.SmartImage;
 import com.loopj.android.image.SmartImageView;
 import com.startapp.android.publish.StartAppAd;
@@ -53,6 +55,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by my on 6/28/2015.
@@ -122,24 +127,76 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
         myImage = (ImageView) findViewById(R.id.img_thumbnailfull);
 
        // imageLoader = CustomVolleyRequestQueue.getInstance(getApplicationContext()).getImageLoader();
-        new BackgroundTask().execute(flag);
+       // new BackgroundTask().execute(flag);
+        startParsingTask();
 
         //imageLoader.get(flag, ImageLoader.getImageListener(myImage, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
         //imageLoader.get(url,ImageLoader.getImageListener());
        // myImage.setImageUrl(flag, imageLoader);
         // myImage.setImageUrl(flag);
-        //myImage.setOnTouchListener(this);
+         myImage.setOnTouchListener(this);
 
 
         //Switch=(ImageSwitcher)findViewById(R.id.viewFlipper);
     }
 
+    private void startParsingTask() {
+        Thread threadA = new Thread() {
+            public void run() {
+
+                try {
+                    new BackgroundTask().execute(flag).get(10, TimeUnit.SECONDS);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (TimeoutException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                       try
+                       {
+                           myImage.setImageBitmap(bitmaptwo);
+                       }
+                       catch (Exception e)
+                       {
+
+                       }
+                    }
+                });
+            }
+        };
+        threadA.start();
+    }
+
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        menu.add("").setOnMenuItemClickListener(this.SetWallpaperClickListener).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+       // MenuInflater inflater = getMenuInflater();
+        //inflater.inflate(R.menu.menu_main, menu);
+
+        menu.add("setaswall").setOnMenuItemClickListener(this.SetWallpaperClickListener).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         return super.onCreateOptionsMenu(menu);
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+//            case R.id.action_settings:
+//                //openSearch();
+//                return true;
+            case R.id.action_settings:
+               // openSettings();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     // Capture actionbar menu item click
@@ -327,8 +384,8 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindDrawables(findViewById(R.id.rela));
-        System.gc();
+       // unbindDrawables(findViewById(R.id.rela));
+        //System.gc();
     }
 
     private void unbindDrawables(View view) {
@@ -353,31 +410,31 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
         protected void onPreExecute() {
             super.onPreExecute();
 
-            mProgressDialog = new ProgressDialog(FullScreenActivity.this);
-            // Set progressdialog title
-            mProgressDialog.setTitle("MyGridApp");
-            // Set progressdialog message
-            mProgressDialog.setMessage("Loading...");
-            mProgressDialog.setIndeterminate(false);
-            // Show progressdialog
-            mProgressDialog.show();
+//            mProgressDialog = new ProgressDialog(FullScreenActivity.this);
+//            // Set progressdialog title
+//            mProgressDialog.setTitle("MyGridApp");
+//            // Set progressdialog message
+//            mProgressDialog.setMessage("Loading...");
+//            mProgressDialog.setIndeterminate(false);
+//            // Show progressdialog
+//            mProgressDialog.show();
         }
 
         protected Bitmap doInBackground(String... url) {
             //--- download an image ---
 
-            bitmaptwo = DownloadImage(url[0]);
-            return bitmaptwo;
+           Bitmap bitmaptwo2 = DownloadImage(url[0]);
+            return bitmaptwo2;
         }
 
         protected void onPostExecute(Bitmap bitmap) {
             // ImageView image = (ImageView) findViewById(R.id.imageView1);
-            //bitmaptwo=bitmap;
+            bitmaptwo=bitmap;
             //image.setImageBitmap(bitmap);
             // bitmaptwo = bitmap;
             //  Toast.makeText(FullScreenActivity.this, "post excute", Toast.LENGTH_LONG).show();
-            myImage.setImageBitmap(bitmaptwo);
-            mProgressDialog.dismiss();
+            //myImage.setImageBitmap(bitmaptwo);
+           // mProgressDialog.dismiss();
         }
     }
 
