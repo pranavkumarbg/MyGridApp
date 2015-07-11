@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.startapp.android.publish.Ad;
 import com.startapp.android.publish.AdDisplayListener;
 import com.startapp.android.publish.AdEventListener;
@@ -49,6 +50,7 @@ import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 public class MainActivity extends ActionBarActivity {
 
     RecyclerView mRecyclerView;
+    private NetworkImageView imgThumbnail;
     RecyclerView.LayoutManager mLayoutManager;
     GridAdapter mAdapter;
     MyNewAdapter myNewAdapter;
@@ -158,7 +160,7 @@ public class MainActivity extends ActionBarActivity {
                 nativeAdListener);
 
         new DownloadJSON().execute();
-
+        imgThumbnail= (NetworkImageView )findViewById(R.id.img_thumbnail);
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
 
@@ -219,14 +221,14 @@ public class MainActivity extends ActionBarActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             // Create a progressdialog
-            mProgressDialog = new ProgressDialog(MainActivity.this);
-            // Set progressdialog title
-            mProgressDialog.setTitle("MyGridApp");
-            // Set progressdialog message
-            mProgressDialog.setMessage("Loading...");
-            mProgressDialog.setIndeterminate(false);
-            // Show progressdialog
-            mProgressDialog.show();
+//            mProgressDialog = new ProgressDialog(MainActivity.this);
+//            // Set progressdialog title
+//            mProgressDialog.setTitle("MyGridApp");
+//            // Set progressdialog message
+//            mProgressDialog.setMessage("Loading...");
+//            mProgressDialog.setIndeterminate(false);
+//            // Show progressdialog
+//            mProgressDialog.show();
 
         }
 
@@ -277,7 +279,7 @@ public class MainActivity extends ActionBarActivity {
                 mRecyclerView.setAdapter(mAdapter);
 
 
-            mProgressDialog.dismiss();
+           // mProgressDialog.dismiss();
 
             //AdBuddiz.showAd(MainActivity.this);
 
@@ -323,7 +325,7 @@ public class MainActivity extends ActionBarActivity {
             public void adHidden(Ad ad) {
 
 
-                Intent intent = new Intent(getApplicationContext(), FullScreenActivity.class);
+                Intent intent = new Intent(getApplicationContext(), NewFullScreanActivity.class);
 
                 // Pass all data flag
                 intent.putExtra("flag", b);
@@ -339,7 +341,11 @@ public class MainActivity extends ActionBarActivity {
                 //intent.putStringArrayListExtra("arr",al);
 
                 // Start SingleItemView Class
-                startActivity(intent);
+
+
+                    startActivity(intent);
+
+
 
             }
 
@@ -399,6 +405,7 @@ public class MainActivity extends ActionBarActivity {
     public void onPause() {
         super.onPause();
         startAppAd.onPause();
+        //mProgressDialog.dismiss();
     }
 
     /**
@@ -414,8 +421,8 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //unbindDrawables(findViewById(R.id.relmain));
-        //System.gc();
+        unbindDrawables(findViewById(R.id.relmain));
+        System.gc();
     }
 
     private void unbindDrawables(View view) {

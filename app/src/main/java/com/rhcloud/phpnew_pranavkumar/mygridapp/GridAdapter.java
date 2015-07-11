@@ -115,14 +115,17 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
             spinner = (ProgressBar)itemView.findViewById(R.id.progressBar);
 
             imgThumbnail= (NetworkImageView )itemView.findViewById(R.id.img_thumbnail);
-            itemView.setOnClickListener(this);
+
+                itemView.setOnClickListener(this);
+
 
         }
 
         @Override
         public void onClick(View v) {
 
-               mItemClickListener.onItemClick(v,getPosition());
+                mItemClickListener.onItemClick(v, getPosition());
+
 
         }
     }

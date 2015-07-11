@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -39,6 +40,7 @@ import com.startapp.android.publish.banner.Banner;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -92,18 +94,21 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
     int position, columnIndex;
     private Cursor cursor;
     String flag;
-
+    DisplayMetrics dm;
+  //  BitmapWorkTask mBitmapWorkTask;
+    public static int deviceHeight;
+    public static int deviceWidth;
     /**
      * StartAppAd object declaration
      */
     private StartAppAd startAppAd = new StartAppAd(this);
     public Bitmap bitmaptwo;
-
+    private final ImageDownloader imageDownloader = new ImageDownloader();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fullscreanactivity);
-
+       // displayIntialize();
         /** Add banner programmatically (within Java code, instead of within the layout xml) **/
         RelativeLayout mainLayout = (RelativeLayout) findViewById(R.id.rela);
 
@@ -126,53 +131,142 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
 
         myImage = (ImageView) findViewById(R.id.img_thumbnailfull);
 
-       // imageLoader = CustomVolleyRequestQueue.getInstance(getApplicationContext()).getImageLoader();
-       // new BackgroundTask().execute(flag);
-        startParsingTask();
+
+
+       new BackgroundTask().execute(flag);
+       // startParsingTask();
+
+       // imageDownloader.download(flag,myImage);
 
         //imageLoader.get(flag, ImageLoader.getImageListener(myImage, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
         //imageLoader.get(url,ImageLoader.getImageListener());
        // myImage.setImageUrl(flag, imageLoader);
         // myImage.setImageUrl(flag);
          myImage.setOnTouchListener(this);
-
+       // mBitmapWorkTask=new BitmapWorkTask();
+        //mBitmapWorkTask.execute(flag);
 
         //Switch=(ImageSwitcher)findViewById(R.id.viewFlipper);
     }
 
-    private void startParsingTask() {
-        Thread threadA = new Thread() {
-            public void run() {
+//    private void startParsingTask() {
+//        Thread threadA = new Thread() {
+//            public void run() {
+//
+//                try {
+//                    new BackgroundTask().execute(flag).get(10, TimeUnit.SECONDS);
+//
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                } catch (ExecutionException e) {
+//                    e.printStackTrace();
+//                } catch (TimeoutException e) {
+//                    e.printStackTrace();
+//                }
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                       try
+//                       {
+//                           myImage.setImageBitmap(bitmaptwo);
+//                           Toast.makeText(FullScreenActivity.this,"set the bitmap",Toast.LENGTH_LONG).show();
+//                       }
+//                       catch (Exception e)
+//                       {
+//
+//                       }
+//                    }
+//                });
+//            }
+//        };
+//        threadA.start();
+//    }
 
-                try {
-                    new BackgroundTask().execute(flag).get(10, TimeUnit.SECONDS);
 
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (TimeoutException e) {
-                    e.printStackTrace();
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                       try
-                       {
-                           myImage.setImageBitmap(bitmaptwo);
-                       }
-                       catch (Exception e)
-                       {
 
-                       }
-                    }
-                });
+
+ /*   static Bitmap downloadBitmap(String...url) {
+        final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
+        final HttpGet getRequest = new HttpGet(url[0]);
+        try {
+            HttpResponse response = client.execute(getRequest);
+            final int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != HttpStatus.SC_OK) {
+
+                Log.w("ImageDownloader", "Error " + statusCode + " while retrieving bitmap from " + url);
+                return null;
             }
-        };
-        threadA.start();
+            final HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                InputStream inputStream = null;
+                try {
+                    inputStream = entity.getContent();
+                    BufferedInputStream bis = new BufferedInputStream(inputStream);
+                    bis.mark(1024 * 1024);
+                    final Bitmap bitmap = decodeSampledBitmapFromResource(bis,deviceWidth,deviceHeight);
+                    return bitmap;
+                } finally {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                    entity.consumeContent();
+                }
+            }
+        } catch (Exception e) {           // Could provide a more explicit error message for IOException or IllegalStateException
+            getRequest.abort();
+            //Log.w("ImageDownloader", "Error while retrieving bitmap from " + url, e.toString());
+            Log.e("LOG_TAG", "Error while retrieving bitmap from" + url + e.toString());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }       return null;
+
+    }
+
+    public static Bitmap decodeSampledBitmapFromResource(BufferedInputStream inputStream,int reqWidth, int reqHeight) {       // First decode with
+        //inJustDecodeBounds=true
+        //to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(inputStream, null, options);       // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);       // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        try {
+            inputStream.reset();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return BitmapFactory.decodeStream(inputStream, null, options);
+
+
+    }
+
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {    // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+        if (height > reqHeight || width > reqWidth) {
+            if (width > height) {
+                inSampleSize = Math.round((float) height / (float) reqHeight);
+            } else {
+                inSampleSize = Math.round((float) width / (float) reqWidth);
+            }
+        }    return inSampleSize;
     }
 
 
+
+
+    private void displayIntialize(){
+        dm= new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        deviceHeight=dm.heightPixels;
+        deviceWidth=dm.widthPixels;
+
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -236,6 +330,7 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
             }
 
             return false;
+            //
         }
     };
 
@@ -368,7 +463,14 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
     @Override
     public void onPause() {
         super.onPause();
+        mProgressDialog.dismiss();
         startAppAd.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        myImage.setImageDrawable(null);
     }
 
     /**
@@ -384,8 +486,9 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
     @Override
     protected void onDestroy() {
         super.onDestroy();
-       // unbindDrawables(findViewById(R.id.rela));
-        //System.gc();
+        mProgressDialog.dismiss();
+       unbindDrawables(findViewById(R.id.rela));
+        System.gc();
     }
 
     private void unbindDrawables(View view) {
@@ -406,25 +509,31 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
     private class BackgroundTask extends AsyncTask<String, Void, Bitmap> {
 
 
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
 
-//            mProgressDialog = new ProgressDialog(FullScreenActivity.this);
-//            // Set progressdialog title
-//            mProgressDialog.setTitle("MyGridApp");
-//            // Set progressdialog message
-//            mProgressDialog.setMessage("Loading...");
-//            mProgressDialog.setIndeterminate(false);
-//            // Show progressdialog
-//            mProgressDialog.show();
+            mProgressDialog = new ProgressDialog(FullScreenActivity.this);
+            // Set progressdialog title
+            mProgressDialog.setTitle("MyGridApp");
+            // Set progressdialog message
+            mProgressDialog.setMessage("Loading...");
+            mProgressDialog.setIndeterminate(false);
+            // Show progressdialog
+            mProgressDialog.show();
         }
 
         protected Bitmap doInBackground(String... url) {
             //--- download an image ---
+           // bitmaptwo = DownloadImage(url[0]);
+            Bitmap mBitmap=null;
 
-           Bitmap bitmaptwo2 = DownloadImage(url[0]);
-            return bitmaptwo2;
+           // mBitmap=downloadBitmap(url);
+            return mBitmap;
+
+
+            //return bitmaptwo;
         }
 
         protected void onPostExecute(Bitmap bitmap) {
@@ -433,8 +542,8 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
             //image.setImageBitmap(bitmap);
             // bitmaptwo = bitmap;
             //  Toast.makeText(FullScreenActivity.this, "post excute", Toast.LENGTH_LONG).show();
-            //myImage.setImageBitmap(bitmaptwo);
-           // mProgressDialog.dismiss();
+            myImage.setImageBitmap(bitmap);
+            mProgressDialog.dismiss();
         }
     }
 
