@@ -43,6 +43,7 @@ public class NewFullScreanActivity extends ActionBarActivity
         Intent i = getIntent();
 
         flag = i.getStringExtra("flag");
+       // spinner.setVisibility(View.VISIBLE);
 
         imageDownloader.download(flag, myImage);
 
@@ -51,6 +52,7 @@ public class NewFullScreanActivity extends ActionBarActivity
 
 
     }
+
 
 
     @Override

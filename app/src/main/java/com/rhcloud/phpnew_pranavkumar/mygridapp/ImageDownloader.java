@@ -16,6 +16,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 /**
  * This helper class download images from the Internet and binds those with the
@@ -30,6 +31,8 @@ import android.widget.ImageView;
  * performance.
  */
 public class ImageDownloader {
+
+
 
     /**
      * Download the specified image from the Internet and binds it to the

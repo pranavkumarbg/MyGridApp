@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
@@ -16,6 +17,7 @@ public class MyVolleySingleton {
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
     private static Context mContext;
+    DiskBasedCache diskBasedCache;
 
     private MyVolleySingleton(Context context) {
         mContext = context;
