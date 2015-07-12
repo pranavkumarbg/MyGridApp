@@ -9,6 +9,7 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/my_launch"
+        android:name=".MyApplication"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity

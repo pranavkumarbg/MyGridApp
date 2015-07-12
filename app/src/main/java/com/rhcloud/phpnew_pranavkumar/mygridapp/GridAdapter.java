@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.loopj.android.image.SmartImageView;
@@ -37,20 +38,21 @@ import java.util.WeakHashMap;
  */
 public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
 
+    private VolleySingleton volleySingleton;
 
-    private LruCache<Integer,Bitmap> imageCache;
     private List<FeedItem> feedItemList=new ArrayList<FeedItem>();
     private Context mContext;
-    FeedItem feedItem;
+
     OnItemClickListener mItemClickListener;
     private ImageLoader imageLoader;
-   // NetworkImageView imgThumbnail;
+
 
     public GridAdapter(Context context,List<FeedItem> feedItemList)
     {
 
         this.feedItemList = feedItemList;
         this.mContext=context;
+
 
     }
 
@@ -70,20 +72,34 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
 
         try
         {
-            //int a=Integer.parseInt(feedItemList.get(pos).getThumbnail());
-            //Bitmap bitmap=imageCache.get(a);
-            //if(bitmap!=null) {
-           // viewHolder.spinner.setVisibility(pos);
-           // viewHolder.imgThumbnail.setImageUrl(feedItemList.get(pos).getThumbnail());
-            //viewHolder.spinner.setVisibility(View.GONE);
+            //volleySingleton=VolleySingleton.getInstance();
+            //imageLoader=volleySingleton.getImageLoader();
 
-            //}
+            //imageLoader=CustomVolleyRequestQueue.getInstance(mContext).getImageLoader();
 
-            imageLoader=CustomVolleyRequestQueue.getInstance(mContext).getImageLoader();
+            String url = feedItemList.get(pos).getThumbnail();
+           // imageLoader.get(url, ImageLoader.getImageListener(viewHolder.imgThumbnail, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
 
-            final String url = feedItemList.get(pos).getThumbnail();
+            imageLoader=MyVolleySingleton.getInstance(mContext).getImageLoader();
             imageLoader.get(url, ImageLoader.getImageListener(viewHolder.imgThumbnail, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
-            //imageLoader.get(url,ImageLoader.getImageListener());
+//            if(url!=null)
+//            {
+//               imageLoader.get(url, new ImageLoader.ImageListener() {
+//                   @Override
+//                   public void onErrorResponse(VolleyError error) {
+//
+//                   }
+//
+//                   @Override
+//                   public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+//
+//                       viewHolder.imgThumbnail.setImageBitmap(response.getBitmap());
+//                   }
+//               });
+//
+//
+//            }
+
             viewHolder.imgThumbnail.setImageUrl(url, imageLoader);
 
         }

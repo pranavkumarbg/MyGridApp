@@ -3,6 +3,7 @@ package com.rhcloud.phpnew_pranavkumar.mygridapp;
 /**
  * Created by my on 7/10/2015.
  */
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -21,7 +22,7 @@ public class DownloadUtil {
             HttpURLConnection con = (HttpURLConnection) new URL(url)
                     .openConnection();
             inputStream = con.getInputStream();
-            return BitmapFactory.decodeStream(inputStream);
+            return BitmapFactory.decodeStream(new FlushedInputStream(inputStream));
         } catch (IOException e) {
             Log.w("", "I/O error while retrieving bitmap from "
                     + url, e);
@@ -40,5 +41,29 @@ public class DownloadUtil {
             }
         }
         return null;
+    }
+
+    static class FlushedInputStream extends FilterInputStream {
+        public FlushedInputStream(InputStream inputStream) {
+            super(inputStream);
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long totalBytesSkipped = 0L;
+            while (totalBytesSkipped < n) {
+                long bytesSkipped = in.skip(n - totalBytesSkipped);
+                if (bytesSkipped == 0L) {
+                    int b = read();
+                    if (b < 0) {
+                        break;  // we reached EOF
+                    } else {
+                        bytesSkipped = 1; // we read one byte
+                    }
+                }
+                totalBytesSkipped += bytesSkipped;
+            }
+            return totalBytesSkipped;
+        }
     }
 }

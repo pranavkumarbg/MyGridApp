@@ -342,8 +342,13 @@ public class MainActivity extends ActionBarActivity {
 
                 // Start SingleItemView Class
 
-
-                    startActivity(intent);
+                    if(b!= null) {
+                        startActivity(intent);
+                    }
+                else
+                    {
+                        Toast.makeText(MainActivity.this,"",Toast.LENGTH_LONG).show();
+                    }
 
 
 
