@@ -103,7 +103,7 @@ public class FullScreenActivity extends ActionBarActivity implements View.OnTouc
      */
     private StartAppAd startAppAd = new StartAppAd(this);
     public Bitmap bitmaptwo;
-    private final ImageDownloader imageDownloader = new ImageDownloader();
+    private final ImageDownloader imageDownloader = new ImageDownloader(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

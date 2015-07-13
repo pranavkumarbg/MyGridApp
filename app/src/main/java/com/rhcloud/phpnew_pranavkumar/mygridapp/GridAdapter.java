@@ -22,10 +22,12 @@ import android.widget.Toast;
 
 
 import com.android.volley.VolleyError;
+
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.loopj.android.image.SmartImageView;
 import com.rhcloud.phpnew_pranavkumar.mygridapp.images.ImageCacheManager;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,7 +48,7 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
 
     OnItemClickListener mItemClickListener;
     private ImageLoader imageLoader;
-
+    private ImageLoader imgLoader;
 
     public GridAdapter(Context context,List<FeedItem> feedItemList)
     {
@@ -82,9 +84,10 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
            // imageLoader.get(url, ImageLoader.getImageListener(viewHolder.imgThumbnail, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
 
            // imageLoader=MyVolleySingleton.getInstance(mContext).getImageLoader();
-            imageLoader=ImageCacheManager.getInstance().getImageLoader();
+           imageLoader=ImageCacheManager.getInstance().getImageLoader();
             imageLoader.get(url, ImageLoader.getImageListener(viewHolder.imgThumbnail, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
 
+           // imgLoader.DisplayImage(url, viewHolder.imgThumbnail);
 
 //            if(url!=null)
 //            {

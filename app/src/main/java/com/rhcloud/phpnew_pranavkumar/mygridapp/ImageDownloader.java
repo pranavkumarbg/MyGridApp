@@ -3,20 +3,37 @@ package com.rhcloud.phpnew_pranavkumar.mygridapp;
 /**
  * Created by my on 7/10/2015.
  */
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+
+import com.rhcloud.phpnew_pranavkumar.mygridapp.images.FileCache;
+import com.rhcloud.phpnew_pranavkumar.mygridapp.images.Utils;
 
 /**
  * This helper class download images from the Internet and binds those with the
@@ -31,9 +48,13 @@ import android.widget.ProgressBar;
  * performance.
  */
 public class ImageDownloader {
+Context mcontext;
+ImageDownloader(Context context)
+{
+    this.mcontext=context;
 
-
-
+    fileCache=new FileCache(context);
+}
     /**
      * Download the specified image from the Internet and binds it to the
      * provided ImageView. The binding is immediate if the image is found in the
@@ -119,6 +140,12 @@ public class ImageDownloader {
             imageViewReference = new WeakReference<ImageView>(imageView);
         }
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
         /**
          * Actual download method.
          */
@@ -149,6 +176,8 @@ public class ImageDownloader {
                     imageView.setImageBitmap(bitmap);
                 }
             }
+
+
         }
     }
 
@@ -187,7 +216,7 @@ public class ImageDownloader {
 
     private static final int HARD_CACHE_CAPACITY = 10;
     private static final int DELAY_BEFORE_PURGE = 10 * 1000; // in milliseconds
-
+    FileCache fileCache;
     // Hard cache, with a fixed maximum capacity and a life duration
     private final HashMap<String, Bitmap> sHardBitmapCache =
             new LinkedHashMap<String, Bitmap>(HARD_CACHE_CAPACITY / 2, 0.75f, true) {
@@ -220,9 +249,16 @@ public class ImageDownloader {
      */
     private void addBitmapToCache(String url, Bitmap bitmap) {
         if (bitmap != null) {
-            synchronized (sHardBitmapCache) {
-                sHardBitmapCache.put(url, bitmap);
-            }
+//            synchronized (sHardBitmapCache) {
+//                sHardBitmapCache.put(url, bitmap);
+//
+//            }
+            Log.d("adding", url);
+            int w = bitmap.getWidth();
+            int h = bitmap.getHeight();
+            fileCache.addFile(url, bitmap);
+
+
         }
     }
 
@@ -232,32 +268,52 @@ public class ImageDownloader {
      */
     private Bitmap getBitmapFromCache(String url) {
         // First try the hard reference cache
-        synchronized (sHardBitmapCache) {
-            final Bitmap bitmap = sHardBitmapCache.get(url);
-            if (bitmap != null) {
-                // Bitmap found in hard cache
-                // Move element to first position, so that it is removed last
-                sHardBitmapCache.remove(url);
-                sHardBitmapCache.put(url, bitmap);
-                return bitmap;
-            }
-        }
+//        synchronized (sHardBitmapCache) {
+//            final Bitmap bitmap = sHardBitmapCache.get(url);
+//
+//            if (bitmap != null) {
+//                // Bitmap found in hard cache
+//                // Move element to first position, so that it is removed last
+//
+//                sHardBitmapCache.remove(url);
+//                sHardBitmapCache.put(url, bitmap);
+//                return bitmap;
+//            }
+//        }
+        File f = fileCache.getFile(url);
 
-        // Then try the soft reference cache
-        SoftReference<Bitmap> bitmapReference = sSoftBitmapCache.get(url);
-        if (bitmapReference != null) {
-            final Bitmap bitmap = bitmapReference.get();
-            if (bitmap != null) {
-                // Bitmap found in soft cache
-                return bitmap;
-            } else {
-                // Soft reference has been Garbage Collected
-                sSoftBitmapCache.remove(url);
-            }
-        }
+//        Log.d("decoding", url);
+       Bitmap b = decodeFile(f);
+        //Bitmap bitmap = BitmapFactory.decodeFile("/sdcard/saved_images/Image-1266255309.jpg");
+           // BitmapFactory.decodeResource()
+            //Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
 
-        return null;
+        if(b!=null)
+            return b;
+
+
+       //Bitmap bitmap = decodeSampledBitmapFromFile(f,100,100);
+
+
+
+
+
+//        // Then try the soft reference cache
+//        SoftReference<Bitmap> bitmapReference = sSoftBitmapCache.get(url);
+//        if (bitmapReference != null) {
+//            final Bitmap bitmap = bitmapReference.get();
+//            if (bitmap != null) {
+//                // Bitmap found in soft cache
+//                return bitmap;
+//            } else {
+//                // Soft reference has been Garbage Collected
+//                sSoftBitmapCache.remove(url);
+//            }
+//        }
+
+       return null;
     }
+
 
     /**
      * Clears the image cache used internally to improve performance. Note that for memory
@@ -266,6 +322,7 @@ public class ImageDownloader {
     public void clearCache() {
         sHardBitmapCache.clear();
         sSoftBitmapCache.clear();
+        fileCache.clear();
     }
 
     /**
@@ -275,5 +332,95 @@ public class ImageDownloader {
         purgeHandler.removeCallbacks(purger);
         purgeHandler.postDelayed(purger, DELAY_BEFORE_PURGE);
     }
+
+    private Bitmap decodeFile(File f){
+        try {
+            //decode image size
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+
+            BitmapFactory.decodeStream(new FileInputStream(f),null,o);
+
+            //Find the correct scale value. It should be the power of 2.
+            final int REQUIRED_SIZE=100;
+            int width_tmp=o.outWidth, height_tmp=o.outHeight;
+            int scale=1;
+            while(true)
+            {
+                if(width_tmp/2<REQUIRED_SIZE || height_tmp/2<REQUIRED_SIZE)
+                    break;
+                width_tmp/=2;
+                height_tmp/=2;
+                scale*=2;
+            }
+
+            //decode with inSampleSize
+            BitmapFactory.Options o2 = new BitmapFactory.Options();
+            o2.inSampleSize=scale;
+            int w=DeviceUtils.getScreenHeight(mcontext);
+            int h=DeviceUtils.getScreenWidth(mcontext);
+           // o2.inSampleSize=calculateInSampleSize(o2,width_tmp,height_tmp);
+            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+        } catch (FileNotFoundException e) {}
+        return null;
+    }
+
+
+    public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filename, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(filename, options);
+    }
+
+    public static int calculateInSampleSize(BitmapFactory.Options options,
+                                            int reqWidth, int reqHeight) {
+        // BEGIN_INCLUDE (calculate_sample_size)
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+
+            // This offers some additional logic in case the image has a strange
+            // aspect ratio. For example, a panorama may have a much larger
+            // width than height. In these cases the total pixels might still
+            // end up being too large to fit comfortably in memory, so we should
+            // be more aggressive with sample down the image (=larger inSampleSize).
+
+            long totalPixels = width * height / inSampleSize;
+
+            // Anything more than 2x the requested pixels we'll sample down further
+            final long totalReqPixelsCap = reqWidth * reqHeight * 2;
+
+            while (totalPixels > totalReqPixelsCap) {
+                inSampleSize *= 2;
+                totalPixels /= 2;
+            }
+        }
+        return inSampleSize;
+        // END_INCLUDE (calculate_sample_size)
+    }
+
 
 }

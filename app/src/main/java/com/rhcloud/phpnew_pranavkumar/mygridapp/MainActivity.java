@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -169,6 +170,7 @@ public class MainActivity extends ActionBarActivity {
        // mstaggeredGridLayoutManager=new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
+
         //mAdapter = new GridAdapter(MainActivity.this, feedItemList);
        // myNewAdapter=new MyNewAdapter(MainActivity.this, feedItemList);
        // mRecyclerView.setAdapter(myNewAdapter);
@@ -276,6 +278,7 @@ public class MainActivity extends ActionBarActivity {
                 //layoutManager.setExtraLayoutSpace(DeviceUtils.getScreenHeight(MainActivity.this));
                 // mRecyclerView.setLayoutManager(layoutManager);
                 //mRecyclerView.setItemAnimator(new SlideInUpAnimator());
+
                 mRecyclerView.setAdapter(mAdapter);
 
 

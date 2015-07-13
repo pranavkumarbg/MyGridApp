@@ -22,6 +22,7 @@ public class DownloadUtil {
             HttpURLConnection con = (HttpURLConnection) new URL(url)
                     .openConnection();
             inputStream = con.getInputStream();
+            BitmapFactory.decodeFile(url);
             return BitmapFactory.decodeStream(new FlushedInputStream(inputStream));
         } catch (IOException e) {
             Log.w("", "I/O error while retrieving bitmap from "
