@@ -14,6 +14,7 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageLoader;
+import com.rhcloud.phpnew_pranavkumar.mygridapp.images.FileCache;
 
 /**
  * Custom implementation of Volley Request Queue
@@ -26,12 +27,13 @@ public class CustomVolleyRequestQueue {
     private ImageLoader mImageLoader;
 
 
-    private CustomVolleyRequestQueue(Context context) {
+    private CustomVolleyRequestQueue(final Context context) {
         mCtx = context;
         mRequestQueue = getRequestQueue();
 
         mImageLoader = new ImageLoader(mRequestQueue,
-                new ImageLoader.ImageCache() {
+                new ImageLoader.ImageCache()
+                {
                     private final LruCache<String, Bitmap>
                             cache = new LruCache<String, Bitmap>(20);
 
@@ -45,6 +47,20 @@ public class CustomVolleyRequestQueue {
                         cache.put(url, bitmap);
                     }
                 });
+
+//        mImageLoader=new ImageLoader(mRequestQueue, new ImageLoader.ImageCache()
+//        {
+//            private  final FileCache fileCache= new FileCache(context);
+//            @Override
+//            public Bitmap getBitmap(String url) {
+//                return fileCache.get(url);
+//            }
+//
+//            @Override
+//            public void putBitmap(String url, Bitmap bitmap) {
+//                fileCache.put(url,bitmap);
+//            }
+//        });
     }
 
     public static synchronized CustomVolleyRequestQueue getInstance(Context context) {
@@ -57,6 +73,7 @@ public class CustomVolleyRequestQueue {
     public RequestQueue getRequestQueue() {
         if (mRequestQueue == null) {
             Cache cache = new DiskBasedCache(mCtx.getCacheDir(), 10 * 1024 * 1024);
+            //FileCache fileCache=new FileCache(mCtx);
             Network network = new BasicNetwork(new HurlStack());
             mRequestQueue = new RequestQueue(cache, network);
             // Don't forget to start the volley request queue

@@ -29,8 +29,7 @@ public class ImageCacheManager{
      *
      */
     public enum CacheType {
-        DISK
-        , MEMORY
+        DISK, MEMORY, FILE
     }
 
     private static ImageCacheManager mInstance;
@@ -45,6 +44,7 @@ public class ImageCacheManager{
      */
     private ImageCache mImageCache;
 
+    private FileCache fileCache;
     /**
      * @return
      * 		instance of the cache manager
@@ -72,13 +72,17 @@ public class ImageCacheManager{
     public void init(Context context, String uniqueName, int cacheSize, CompressFormat compressFormat, int quality, CacheType type){
         switch (type) {
             case DISK:
-                mImageCache= new DiskLruImageCache(context, uniqueName, cacheSize, compressFormat, quality);
+               // mImageCache= new DiskLruImageCache(context, uniqueName, cacheSize, compressFormat, quality);
                 break;
             case MEMORY:
                 mImageCache = new BitmapLruImageCache(cacheSize);
+            case FILE:
+                mImageCache = new FileCache(context,cacheSize);
             default:
                 mImageCache = new BitmapLruImageCache(cacheSize);
+               // mImageCache = new FileCache(context,cacheSize);
                 break;
+
         }
 
         mImageLoader = new ImageLoader(RequestManager.getRequestQueue(), mImageCache);
@@ -86,7 +90,8 @@ public class ImageCacheManager{
 
     public Bitmap getBitmap(String url) {
         try {
-            return mImageCache.getBitmap(createKey(url));
+           return mImageCache.getBitmap(createKey(url));
+           //return fileCache.get(url);
         } catch (NullPointerException e) {
             throw new IllegalStateException("Disk Cache Not initialized");
         }
@@ -95,6 +100,7 @@ public class ImageCacheManager{
     public void putBitmap(String url, Bitmap bitmap) {
         try {
             mImageCache.putBitmap(createKey(url), bitmap);
+            //fileCache.put(url,bitmap);
         } catch (NullPointerException e) {
             throw new IllegalStateException("Disk Cache Not initialized");
         }

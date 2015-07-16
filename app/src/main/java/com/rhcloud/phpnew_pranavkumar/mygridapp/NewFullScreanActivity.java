@@ -16,9 +16,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.loopj.android.image.SmartImage;
 import com.loopj.android.image.SmartImageView;
-import com.rhcloud.phpnew_pranavkumar.mygridapp.images.ImageLoader;
+import com.rhcloud.phpnew_pranavkumar.mygridapp.images.ImageCacheManager;
+
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,7 +34,7 @@ import java.util.Random;
  */
 public class NewFullScreanActivity extends ActionBarActivity
 {
-    private ImageView myImage;
+    private NetworkImageView myImage;
     NewImageDownloader newImageDownloader;
     private final ImageDownloader imageDownloader = new ImageDownloader(this);
     private ImageLoader imageLoader;
@@ -41,11 +44,12 @@ public class NewFullScreanActivity extends ActionBarActivity
     private ProgressBar spinner;
     ProgressDialog downloadProgressDialog;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fullscreanactivity);
-        myImage = (ImageView) findViewById(R.id.img_thumbnailfull);
+        myImage = (NetworkImageView) findViewById(R.id.img_thumbnailfull);
         spinner=(ProgressBar)findViewById(R.id.progressBar2);
         Intent i = getIntent();
 
@@ -54,10 +58,12 @@ public class NewFullScreanActivity extends ActionBarActivity
 
        // imageDownloader.download(flag, myImage);
 
+        imageLoader= ImageCacheManager.getInstance().getImageLoader();
+        imageLoader.get(flag, ImageLoader.getImageListener(myImage, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
+        myImage.setImageUrl(flag, imageLoader);
 
 
-
-        new MybitmapDownloaderTasknew().execute();
+       // new MybitmapDownloaderTasknew().execute();
 
         spinner.setVisibility(View.GONE);
 

@@ -27,13 +27,17 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.rhcloud.phpnew_pranavkumar.mygridapp.images.DecodeBitmapTask;
 import com.rhcloud.phpnew_pranavkumar.mygridapp.images.FileCache;
 import com.rhcloud.phpnew_pranavkumar.mygridapp.images.Utils;
+
+import rapid.decoder.BitmapDecoder;
 
 /**
  * This helper class download images from the Internet and binds those with the
@@ -49,11 +53,13 @@ import com.rhcloud.phpnew_pranavkumar.mygridapp.images.Utils;
  */
 public class ImageDownloader {
 Context mcontext;
+    ImageView imageViewx;
+    Bitmap bitmap=null;
 ImageDownloader(Context context)
 {
     this.mcontext=context;
 
-    fileCache=new FileCache(context);
+   // fileCache=new FileCache(context);
 }
     /**
      * Download the specified image from the Internet and binds it to the
@@ -66,16 +72,21 @@ ImageDownloader(Context context)
      * @param imageView
      *            The ImageView to bind the downloaded image to.
      */
-    public void download(String url, ImageView imageView) {
+    public Bitmap download(String url, ImageView imageView) {
+        imageViewx=imageView;
         resetPurgeTimer();
-        Bitmap bitmap = getBitmapFromCache(url);
-        //forceDownload(url, imageView);
+        bitmap = getBitmapFromCache(url);
+//        forceDownload(url, imageView);
         if (bitmap == null) {
+            Log.d("imageDownloader","nulllllllllllllllllllllllllllllllllllllll");
             forceDownload(url, imageView);
         } else {
-            cancelPotentialDownload(url, imageView);
-            imageView.setImageBitmap(bitmap);
+            Log.d("imageDownloader","nottttttttttttttttttttttttttttttttttttt");
+           // cancelPotentialDownload(url, imageView);
+           // imageView.setImageBitmap(bitmap);
+            //bitmap=null;
         }
+        return bitmap;
     }
 
     private static boolean cancelPotentialDownload(String url, ImageView imageView) {
@@ -253,10 +264,10 @@ ImageDownloader(Context context)
 //                sHardBitmapCache.put(url, bitmap);
 //
 //            }
-            Log.d("adding", url);
+            //Log.d("adding", url);
             int w = bitmap.getWidth();
             int h = bitmap.getHeight();
-            fileCache.addFile(url, bitmap);
+           // fileCache.addFile(url, bitmap);
 
 
         }
@@ -280,21 +291,30 @@ ImageDownloader(Context context)
 //                return bitmap;
 //            }
 //        }
-        File f = fileCache.getFile(url);
+       // synchronized (fileCache) {
+          // File f = fileCache.getFile(url);
+         //bitmap=fileCache.getBitmap(url);
+           // File root = Environment.getExternalStorageDirectory();
+           // Log.d("decoding", f.getAbsolutePath());
+            // Bitmap b = decodeFile(f);
+           // Bitmap bitmap = decodeFile(f);
+       // bitmap=BitmapDecoder.from(f.getAbsolutePath()).decode();
+       //  BitmapDecoder.from(f.getAbsolutePath()).into(imageViewx);
+       // BitmapDecoder.from(bitmap).into(imageViewx);
 
-//        Log.d("decoding", url);
-       Bitmap b = decodeFile(f);
-        //Bitmap bitmap = BitmapFactory.decodeFile("/sdcard/saved_images/Image-1266255309.jpg");
-           // BitmapFactory.decodeResource()
-            //Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+//        File root = Environment.getExternalStorageDirectory();
+//        File file = new File(root.getAbsolutePath()+"/saved_images");
+//        //I identify images by hashcode. Not a perfect solution, good for the demo.
+//        String filename=String.valueOf(url.hashCode());
+//        //Another possible solution (thanks to grantland)
+//        //String filename = URLEncoder.encode(url);
+//        String fname = "Image-"+ filename +".jpg";
+//        File f = new File(file, fname);
+//        BitmapDecoder.from(f.getAbsolutePath()).into(imageViewx);
+        Log.d("imageDownloader", "getitfrombitmap");
 
-        if(b!=null)
-            return b;
-
-
-       //Bitmap bitmap = decodeSampledBitmapFromFile(f,100,100);
-
-
+           return null;
+        //}
 
 
 
@@ -311,7 +331,7 @@ ImageDownloader(Context context)
 //            }
 //        }
 
-       return null;
+       // return null;
     }
 
 
@@ -344,6 +364,7 @@ ImageDownloader(Context context)
             //Find the correct scale value. It should be the power of 2.
             final int REQUIRED_SIZE=100;
             int width_tmp=o.outWidth, height_tmp=o.outHeight;
+            //int width_tmp=150, height_tmp=150;
             int scale=1;
             while(true)
             {
@@ -422,5 +443,28 @@ ImageDownloader(Context context)
         // END_INCLUDE (calculate_sample_size)
     }
 
+    Bitmap ShrinkBitmap(String file, int width, int height){
+
+        BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
+        bmpFactoryOptions.inJustDecodeBounds = true;
+        Bitmap bitmap = BitmapFactory.decodeFile(file, bmpFactoryOptions);
+
+        int heightRatio = (int)Math.ceil(bmpFactoryOptions.outHeight/(float)height);
+        int widthRatio = (int)Math.ceil(bmpFactoryOptions.outWidth/(float)width);
+
+        if (heightRatio > 1 || widthRatio > 1)
+        {
+            if (heightRatio > widthRatio)
+            {
+                bmpFactoryOptions.inSampleSize = heightRatio;
+            } else {
+                bmpFactoryOptions.inSampleSize = widthRatio;
+            }
+        }
+
+        bmpFactoryOptions.inJustDecodeBounds = false;
+        bitmap = BitmapFactory.decodeFile(file, bmpFactoryOptions);
+        return bitmap;
+    }
 
 }

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.LruCache;
@@ -23,10 +24,13 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 
+
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.loopj.android.image.SmartImageView;
+import com.rhcloud.phpnew_pranavkumar.mygridapp.images.FileCache;
 import com.rhcloud.phpnew_pranavkumar.mygridapp.images.ImageCacheManager;
+
 
 
 import java.util.ArrayList;
@@ -47,8 +51,12 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
     private Context mContext;
 
     OnItemClickListener mItemClickListener;
+    ImageView imageView;
+    String flag;
     private ImageLoader imageLoader;
-    private ImageLoader imgLoader;
+    FileCache fileCache;
+    //private com.rhcloud.phpnew_pranavkumar.mygridapp.images.ImageLoader imageLoadernew;
+   // ImageDownloader imageDownloader;
 
     public GridAdapter(Context context,List<FeedItem> feedItemList)
     {
@@ -81,13 +89,35 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
             //imageLoader=CustomVolleyRequestQueue.getInstance(mContext).getImageLoader();
 
             String url = feedItemList.get(pos).getThumbnail();
+          //  Log.d("image", url);
            // imageLoader.get(url, ImageLoader.getImageListener(viewHolder.imgThumbnail, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
 
            // imageLoader=MyVolleySingleton.getInstance(mContext).getImageLoader();
-           imageLoader=ImageCacheManager.getInstance().getImageLoader();
-            imageLoader.get(url, ImageLoader.getImageListener(viewHolder.imgThumbnail, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
 
+//           Bitmap bitmap= ImageCacheManager.getInstance().getBitmap(url);
+//
+//
+//            if(bitmap!=null)
+//            {
+//                Log.d("image", "not null");
+//                viewHolder.imgThumbnail.setImageBitmap(bitmap);
+//            }
+//            else
+//            {
+                //Log.d("image", "null");
+
+            imageLoader=ImageCacheManager.getInstance().getImageLoader();
+
+                imageLoader.get(url, ImageLoader.getImageListener(viewHolder.imgThumbnail, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
+                viewHolder.imgThumbnail.setImageUrl(url, imageLoader);
+
+
+          //  }
+
+           // imageDownloader.download(url,viewHolder.imgThumbnail);
            // imgLoader.DisplayImage(url, viewHolder.imgThumbnail);
+
+            //new MybitmapDownloaderTasknew().execute();
 
 //            if(url!=null)
 //            {
@@ -107,7 +137,8 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
 //
 //            }
 
-            viewHolder.imgThumbnail.setImageUrl(url, imageLoader);
+
+           // viewHolder.imgThumbnail.setImageBitmap(imageDownloader.download(url,viewHolder.imgThumbnail));
 
         }
         catch (Exception e)
@@ -160,4 +191,8 @@ public class GridAdapter  extends RecyclerView.Adapter<GridAdapter.ViewHolder>{
     public void SetOnItemClickListener(final OnItemClickListener mItemClickListener) {
         this.mItemClickListener = mItemClickListener;
     }
+
+
+
+
 }

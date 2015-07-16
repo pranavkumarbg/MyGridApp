@@ -31,6 +31,9 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['StartAppMoPubMediation-1.0.2.jar'])
     compile 'jp.wasabeef:recyclerview-animators:1.2.0@aar'
     compile 'com.jakewharton:disklrucache:2.0.2'
+    compile 'rapid.decoder:library:0.3.0'
+
+
 
 
 

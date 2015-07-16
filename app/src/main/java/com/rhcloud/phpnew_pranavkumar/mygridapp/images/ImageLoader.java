@@ -34,7 +34,7 @@ public class ImageLoader {
     ExecutorService executorService;
 
     public ImageLoader(Context context){
-        fileCache=new FileCache(context);
+        //fileCache=new FileCache(context);
         executorService=Executors.newFixedThreadPool(5);
     }
 
